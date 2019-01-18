@@ -50,10 +50,13 @@ def dashboard():
     email = None
     tt = json.dumps(request.form)
     headers = {'Accept' : 'application/json', 'Content-Type' : 'application/json'}
+
+    # connect to API and log in
     info = requests.post('http://localhost:5000/login', data=json.dumps(request.form), headers=headers)
     ff = info.text
     ww = info.text
 
+    #   checking if username and password is correct
     if (ww != 'Could not verify'):
              info = unicodedata.normalize('NFKD', info.text).encode('ascii','ignore')
              info = json.loads(info)
@@ -64,13 +67,15 @@ def dashboard():
              keeptoken(gettoken=token,getname=username)
 
              if (name == 1):
-
+                 #  for admin
                  username = info['username']
 
+                 # get all client in the db
                  info = requests.get('http://localhost:5000/allclients?token='+token_)
                  info = unicodedata.normalize('NFKD', info.text).encode('ascii','ignore')
                  data = json.loads(info)
 
+                 # get all users in the db
                  info = requests.get('http://localhost:5000/user?token='+token_)
                  info = unicodedata.normalize('NFKD', info.text).encode('ascii','ignore')
                  data2 = json.loads(info)
@@ -78,6 +83,7 @@ def dashboard():
                  # session.clear()
                  return render_template('show.html', info=data,info2=data2, mimetype='text/html', user=username)
              else:
+                 # for ordinary or sub users
                  username = info['username']
                  info = requests.get('http://localhost:5000/allclients?token='+token_)
                  info = unicodedata.normalize('NFKD', info.text).encode('ascii','ignore')
@@ -87,6 +93,7 @@ def dashboard():
                  return render_template('otheruserspage.html', info=data, mimetype='text/html', user=username)
 
     else:
+             #  return to this page if password is incorrect
              flash('Username or Password Incorrect, Check and Try Again')
              return render_template('loginPage.html')
 
@@ -95,20 +102,28 @@ def dashboard():
 def createuser():
 
     headers = {'Accept' : 'application/json', 'Content-Type' : 'application/json'}
+
+    # create a user
     requests.post('http://localhost:5000/user?token='+token_, data=json.dumps(request.form), headers=headers)
 
     info = requests.get('http://localhost:5000/allclients?token='+token_)
 
+    # if creating a user is successful
     if 'clients' in info.text:
         info = unicodedata.normalize('NFKD', info.text).encode('ascii','ignore')
         data = json.loads(info)
+
+        info = requests.get('http://localhost:5000/user?token='+token_)
+        info = unicodedata.normalize('NFKD', info.text).encode('ascii','ignore')
+        data2 = json.loads(info)
 
         flash("User Created Successfully")
 
         # session.clear()
 
-        return render_template('show.html', info=data, mimetype='text/html', user=username)
+        return render_template('show.html', info=data,info2=data2, mimetype='text/html', user=username)
     else:
+        # user is not successful
         message = "Token Has Expire, Please Login Again"
         return render_template('loginPage.html', message2=message)
 
@@ -120,16 +135,20 @@ def authuser():
     email = None
     tt = json.dumps(request.form)
     headers = {'Accept' : 'application/json', 'Content-Type' : 'application/json'}
+
+    # get token and login
     info = requests.post('http://localhost:5000/login', data=json.dumps(request.form), headers=headers)
 
     ff = info.text
     ww = info.text
 
+    # if username and password is correct and token is generated
     if (ww != 'Could not verify'):
         info = unicodedata.normalize('NFKD', info.text).encode('ascii','ignore')
         info = json.loads(info)
         name = info['admin']
 
+        #  for admin
         if (name == 1):
             token = info['token']
             username = info['username']
@@ -140,14 +159,18 @@ def authuser():
 
             # session.clear()
             return render_template('create.html', info=data, mimetype='text/html', user=username)
+        #
         else:
-            username = info['username']
-            info = requests.get('http://localhost:5000/allclients?token='+token_)
-            info = unicodedata.normalize('NFKD', info.text).encode('ascii','ignore')
-            data = json.loads(info)
 
-            # session.clear()
-            return render_template('loginPage.html', info=data, mimetype='text/html', user=username)
+            # username = info['username']
+            # info = requests.get('http://localhost:5000/allclients?token='+token_)
+            # info = unicodedata.normalize('NFKD', info.text).encode('ascii','ignore')
+            # data = json.loads(info)
+
+
+            #  not an admin
+            session.clear()
+            return render_template('loginPage.html')
 
     else:
         flash('Username or Password Incorrect, Check and Try Again')

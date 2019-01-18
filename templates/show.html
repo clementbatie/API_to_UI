@@ -82,7 +82,7 @@
             <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span>
             <!--<img src="./images/me.jpg" alt="Avatar" class="avatar">-->
             <!--<img src="{{ user_image }}"></img>-->
-            <h1 style="padding-left: 30px;">Login1111</h1>
+            <h1 style="padding-left: 30px;">Login</h1>
         </div>
 
 
@@ -129,7 +129,6 @@
             <td class="mr-2"> {{ user['name'] }}</td>
             <td class="text-muted">{{ user['Admin'] }}</td>
         </tr>
-        <span class="psw" style="font-size:20px"><a href="{{url_for('/deleteuser/user['public_id]')}}">Return</a></span>
 
         {% endfor %}
     </table>
